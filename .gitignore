@@ -1,0 +1,7 @@
+x64/
+*.tlog
+*.obj
+out/
+.vs/
+tensorflow.dll
+Debug/
