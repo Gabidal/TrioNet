@@ -4,8 +4,8 @@
 class Mem
 {
 public:
-	Mem(){}
-	~Mem(){}
+	Mem();
+	~Mem();
 
 private:
 

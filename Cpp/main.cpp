@@ -3,6 +3,5 @@
 using namespace std;
 
 int main() {
-	Tensor_Make_Skynet(123);
 	return 0;
 }

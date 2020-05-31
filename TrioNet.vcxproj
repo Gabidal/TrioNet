@@ -124,6 +124,9 @@
     <ClInclude Include="h\tensor\tensorflow\c\tf_tensor.h" />
     <ClInclude Include="out\build\x64-debug (default)\cmakefiles\showincludes\foo.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
