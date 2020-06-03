@@ -47,7 +47,7 @@ double Layer::Activate(double Sum)
 
 double Layer::Generate_Weight()
 {
-	return (double)rand() * 500 / 1000;
+	return static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 }
 
 void Layer::Generate_Nodes(vector<Connection*> Input)
@@ -64,5 +64,46 @@ void Layer::Generate_Nodes(vector<Connection*> Input)
 			N.Connections.push_back(*Input.at(i));
 		Nodes.push_back(N);
 	}
+	return;
+}
 
+vector<Connection*> Layer::Factory(vector<double> Input)
+{
+	Generate_Nodes(Input);
+	//create the refrence table for nodes
+	vector<Connection*> Output;
+	for (Node& i : Nodes) {
+		Connection* C = new Connection(&i, Generate_Weight());
+		Output.push_back(C);
+	}
+	return Output;
+}
+
+void Layer::Generate_Nodes(vector<double> Input)
+{
+	//here we will make new starting nodes and give them into the pipeline
+	//first make the starting nodes
+	vector<Node*> Start_Nodes;
+	for (double i : Input) {
+		Node* N = new Node(i);
+		Start_Nodes.push_back(N);
+	}
+	//then make the connections into them
+	vector<Connection*> Start_Weights;
+	for (Node* i : Start_Nodes) {
+		Connection* C = new Connection(i, Generate_Weight());
+		Start_Weights.push_back(C);
+	}
+	//here we will generate the nodes for this chunk
+	for (int i = 0; i < Input.size();) {
+		Node N;
+		for (int j = 0; j < Input.size() / Height; j++) {
+			N.Connections.push_back(*Start_Weights.at(i));
+			i++;
+		}
+		for (int j = 0; j < Input.size() % Height; j++)
+			N.Connections.push_back(*Start_Weights.at(i-1));
+		Nodes.push_back(N);
+	}
+	return;
 }

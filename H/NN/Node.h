@@ -9,10 +9,11 @@ using namespace std;
 class Node
 {
 public:
-	Node(){}
-	~Node(){}
-	double Bias;
-	double Data;
+	Node() {}
+	Node(double D) : Data(D) {}
+	~Node() {}
+	double Bias = 0;
+	double Data = 1;
 	vector<Connection> Connections;
 };
 
