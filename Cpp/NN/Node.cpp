@@ -1,21 +1,8 @@
 #include "../../H/NN/Node.h"
+constexpr double e = 2.718281828//45904523536028747135266249775724709369995;
 
-inline void Node::Give_Data(float D)
+double Node::Activate(double Data)
 {
-	Data = D;
-}
-
-inline float Node::Get_Data()
-{
-	return Data;
-}
-
-inline void Node::Update_Weight(float W)
-{
-	Weight = W;
-}
-
-inline float Node::Get_Weight()
-{
-	return Weight;
+	//(1) / (1 + e ^ (-0.01 x)) * 2 - 1
+	return (1/(1+pow(e, (-Scale * Data))) * 2 - 1);
 }
