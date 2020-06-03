@@ -24,6 +24,9 @@
     <ClCompile Include="Cpp\NN\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Cpp\NN\Layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="h\mem\Mem.h">
@@ -56,7 +59,7 @@
     <ClInclude Include="H\NN\Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="H\NN\Chunk.h">
+    <ClInclude Include="H\NN\Layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

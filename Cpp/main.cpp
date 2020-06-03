@@ -1,7 +1,8 @@
 #include <iostream>
-#include "../H/Tensor/tensorflow/c/c_api.h"
+#include "../H/NN/Layer.h"
 using namespace std;
 
 int main() {
+	Layer L(false, 3);
 	return 0;
 }

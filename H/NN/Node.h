@@ -1,15 +1,19 @@
 #ifndef _NODE_H_
 #define _NODE_H_
 #include <math.h>
+#include <vector>
+#include "Connection.h"
+
+using namespace std;
 
 class Node
 {
 public:
-	Node(float W) : Weight(W){}
+	Node(){}
 	~Node(){}
-	double Activate(double Data);
-	double Scale;
-	float Weight;
+	double Bias;
+	double Data;
+	vector<Connection> Connections;
 };
 
 #endif
