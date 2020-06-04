@@ -10,7 +10,7 @@ class Node
 {
 public:
 	Node() {}
-	Node(double D) : Data(D) {}
+	Node(double bias) : Bias(bias) {}
 	~Node() {}
 	double Bias = 0;
 	double Data = 1;

@@ -11,11 +11,12 @@ class Layer
 {
 public:
 	Layer(bool new_weights, int height);
+	Layer(bool new_weights);
 	~Layer();
 	//this factory creates a pipeline to work with
-	vector<Connection*> Factory(vector<Connection*>);
+	vector<Node> &Factory(vector<Node>&);
 	//for raw input
-	vector<Connection*> Factory(vector<double>);
+	vector<Node> &Factory(vector<double>);
 	//this function can start line compute the NN matrix from this chunk
 	void Update();
 
@@ -25,12 +26,9 @@ private:
 	double Scale = 1;
 	vector<Node> Nodes;
 	//map<double, vector<Connection*>> Previus_Usage;
-	double Sum(Node*);
+	double Sum(Node&);
 	double Activate(double Data);
 	double Generate_Weight();
-	void Generate_Nodes(vector<Connection*> Input);
-	//for raw input
-	void Generate_Nodes(vector<double> Input);
 };
 
 #endif // !_CHUNK_H_

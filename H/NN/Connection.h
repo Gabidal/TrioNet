@@ -5,10 +5,10 @@ class Node;
 class Connection
 {
 public:
-	Connection(Node* O, double w) : Other(O), Weight(w) {}
+	Connection(Node& O, double w) : Other(O), Weight(w) {}
 	~Connection(){}
 	double Weight;
-	Node* Other;
+	Node& Other;
 };
 
 #endif
