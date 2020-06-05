@@ -114,12 +114,14 @@
     <ClCompile Include="cpp\main.cpp" />
     <ClCompile Include="cpp\mem\Mem.cpp" />
     <ClCompile Include="Cpp\NN\Layer.cpp" />
+    <ClCompile Include="Cpp\NN\NN.cpp" />
     <ClCompile Include="Cpp\NN\Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="h\mem\Mem.h" />
     <ClInclude Include="H\NN\Layer.h" />
     <ClInclude Include="H\NN\Connection.h" />
+    <ClInclude Include="H\NN\NN.h" />
     <ClInclude Include="H\NN\Node.h" />
     <ClInclude Include="h\tensor\tensorflow\c\c_api.h" />
     <ClInclude Include="h\tensor\tensorflow\c\eager\c_api.h" />

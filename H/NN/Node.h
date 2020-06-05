@@ -14,6 +14,8 @@ public:
 	~Node() {}
 	double Bias = 0;
 	double Data = 1;
+	double Delta = 0;
+	double Error = 0;
 	vector<Connection> Connections;
 };
 

@@ -1,25 +1,14 @@
 #include <iostream>
-#include "../H/NN/Layer.h"
+#include "../H/NN/NN.h"
 using namespace std;
 
 int main() {
+	NN n(2, 3, 2, 1);
 	//input 
-	Layer Start(false);
-	vector<Node> Input = Start.Factory({ 1, 0, 1, 1, 0, 1, 1, 1, 0, 0});
-	Layer Hidden1(false, 5);
-	vector<Node> Hidden = Hidden1.Factory(Input);
-	Layer End(false, 2);
-	vector<Node> Output = End.Factory(Hidden);
-
-	vector<Layer> NN;
-
-	NN.push_back(Start);
-	NN.push_back(Hidden1);
-	NN.push_back(End);
-
-	//the actual feed foward
-	for (Layer& i : NN) {
-		i.Update();
+	for (int i = 0; i < 5000; i++) {
+		n.Load({ 1, 1 });	//AND
+		n.Train({ 1 });
 	}
+	n.Load({ 1, 0 });	//XOR
 	return 0;
 }

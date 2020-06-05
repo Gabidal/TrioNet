@@ -27,6 +27,9 @@
     <ClCompile Include="Cpp\NN\Layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Cpp\NN\NN.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="h\mem\Mem.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="H\NN\Layer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="H\NN\NN.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

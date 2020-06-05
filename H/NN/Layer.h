@@ -14,20 +14,20 @@ public:
 	Layer(bool new_weights);
 	~Layer();
 	//this factory creates a pipeline to work with
-	vector<Node> &Factory(vector<Node>&);
+	vector<Node> *Factory(vector<Node>*);
 	//for raw input
-	vector<Node> &Factory(vector<double>);
+	vector<Node> *Factory(vector<double>);
 	//this function can start line compute the NN matrix from this chunk
 	void Update();
-
-private:
-	int Height;
-	bool New_Weights;
-	double Scale = 1;
 	vector<Node> Nodes;
+	double Sensitivity = 1;
+	double Activate(double Data);
+	double Derivate(double Data);
+private:
+	int Height = 0;
+	bool New_Weights = false;
 	//map<double, vector<Connection*>> Previus_Usage;
 	double Sum(Node&);
-	double Activate(double Data);
 	double Generate_Weight();
 };
 

@@ -16,24 +16,24 @@ Layer::~Layer()
 {
 }
 
-vector<Node> &Layer::Factory(vector<Node> &Input)
+vector<Node> *Layer::Factory(vector<Node> *Input)
 {
 	//if we get the nodes as input we need to-
 	//create connections with weihts to em and our layer nodes as well
 	for (int i = 0; i < Height; i++) {
 		Node N; //(insert bias here)
-		for (Node& i : Input) {
+		for (Node& j : *Input) {
 			//now give the input nodes with new weights-
 			//and give em into the node N
-			Connection connection(i, Generate_Weight());
+			Connection connection(&j, Generate_Weight());
 			N.Connections.push_back(connection);
 		}
 		Nodes.push_back(N);
 	}
-	return Nodes;
+	return &Nodes;
 }
 
-vector<Node>& Layer::Factory(vector<double> Input)
+vector<Node>* Layer::Factory(vector<double> Input)
 {	
 	//if we get the nodes as input we need to-
 	//create connections with weihts to em and our layer nodes as well
@@ -42,7 +42,7 @@ vector<Node>& Layer::Factory(vector<double> Input)
 		N.Data = Input.at(i);
 		Nodes.push_back(N);
 	}
-	return Nodes;
+	return &Nodes;
 }
 
 void Layer::Update()
@@ -58,14 +58,22 @@ double Layer::Sum(Node& n)
 	//first iterate every connection that n has adn multiply them into a new vector where we sum them then.
 	double Result = 0.0;
 	for (Connection i : n.Connections)
-		Result += i.Weight * i.Other.Data;
-	return Result;
+		Result += i.Weight * i.Other->Data;
+	return Result + n.Bias;
 }
 
 double Layer::Activate(double Sum)
 {
 	//(1) / (1 + e ^ (-0.01 x)) * 2 - 1
-	return (1 / (1 + pow(e, (-Scale * Sum))) * 2 - 1);
+	//return (1 / (1 + pow(e, (-Sensitivity * Sum))));
+	return 1 / (1 + pow(e, -Sum));
+}
+
+double Layer::Derivate(double Data)
+{
+	//(2e^(-Sensitivity*Data)Sensitivity)/((e^(-Sensitivity*Data)+1)^2)
+	//return (2*pow(e, -Sensitivity*Data)*Sensitivity)/(pow(pow(e, -Sensitivity*Data)+1, 2));
+	return Data * (1.0 - Data);
 }
 
 double Layer::Generate_Weight()
