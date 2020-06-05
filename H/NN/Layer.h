@@ -23,8 +23,8 @@ public:
 	double Sensitivity = 1;
 	double Activate(double Data);
 	double Derivate(double Data);
-private:
 	int Height = 0;
+private:
 	bool New_Weights = false;
 	//map<double, vector<Connection*>> Previus_Usage;
 	double Sum(Node&);

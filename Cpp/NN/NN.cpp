@@ -7,6 +7,7 @@ NN::NN(int Input_Height, int x, int y,  int Output_Height)
 	vector<Node> Input_Nodes(Input_Height);
 	Input->Nodes = Input_Nodes;
 	vector<Node>* Previus = &Input->Nodes;// = Input->Factory(Input_Data);
+	Input->Height = Input->Nodes.size();
 	Layers.push_back(Input);
 
 	//loop the hidden layer generation
@@ -33,7 +34,32 @@ void NN::Load(vector<double> Input) {
 	return;
 }
 
-void NN::Train(vector<double> Expected)
+void NN::Train(vector<double> Input_Map, vector<double> Expected_Map)
+{
+	if ((Input_Map.size() % Layers.at(0)->Height != 0) || (Expected_Map.size() % Layers.at(Layers.size() - 1)->Height != 0)) {
+		return;
+	}
+	while (Input_Map.size() > 0)
+	{
+		vector<double> Input(Input_Map.begin(), Input_Map.begin() + Layers.at(0)->Height);
+		vector<double> Output(Expected_Map.begin(), Expected_Map.begin() + Layers.at(Layers.size() - 1)->Height);
+		Load(Input);
+		Back_Propagate(Output);
+		Input_Map.erase(Input_Map.begin(), Input_Map.begin() + Layers.at(0)->Height);
+		Expected_Map.erase(Expected_Map.begin(), Expected_Map.begin() + Layers.at(Layers.size() - 1)->Height);
+	}
+
+	for (Layer* x : Layers) {
+		for (Node& y : x->Nodes) {
+			for (Connection& z : y.Connections) {
+				z.Weight += accumulate(z.Changes.begin(), z.Changes.end(), 0.0) / z.Changes.size();
+				z.Changes.clear();
+			}
+		}
+	}
+}
+
+void NN::Back_Propagate(vector<double> Expected)
 {
 	//first clean all errors
 	for (Layer* x : Layers) {
@@ -56,11 +82,11 @@ void NN::Train(vector<double> Expected)
 		}
 	}
 	//train the weights
-	//weight = weight + learning_rate * error * input
+	//weight = weight + learning_rate * Delta * input
 	for (Layer* x : Layers) {
 		for (Node& y : x->Nodes) {
 			for (Connection& z : y.Connections) {
-				z.Weight += 0.5 * y.Error * (z.Other->Data * z.Weight);
+				z.Changes.push_back(0.1 * y.Delta * (z.Other->Data));
 			}
 		}
 	}

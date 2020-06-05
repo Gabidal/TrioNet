@@ -30,6 +30,7 @@ vector<Node> *Layer::Factory(vector<Node> *Input)
 		}
 		Nodes.push_back(N);
 	}
+	Height = Nodes.size();
 	return &Nodes;
 }
 
@@ -42,6 +43,7 @@ vector<Node>* Layer::Factory(vector<double> Input)
 		N.Data = Input.at(i);
 		Nodes.push_back(N);
 	}
+	Height = Nodes.size();
 	return &Nodes;
 }
 

@@ -3,6 +3,7 @@
 #include "Layer.h"
 #include <vector>
 #include <iostream>
+#include <numeric>
 
 using namespace std;
 
@@ -13,9 +14,10 @@ public:
 	//also generate the layers
 	NN(int, int, int, int);
 	~NN(){}
+	void Train(vector<double> Input, vector<double> Expected);
 	void Load(vector<double>);
-	void Train(vector<double>);
 private:
+	void Back_Propagate(vector<double>);
 	void Feed_Foward();
 	//0:th has the input && last has the output, layer
 	bool Load_Data_From_File = false;
