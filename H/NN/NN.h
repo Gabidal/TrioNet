@@ -18,7 +18,7 @@ public:
 	NN(int, int, int, int);
 	~NN(){}
 	void Generate_Data_Set(vector<double>(*function) (vector<double>), int Parameter_amount, int min, int max);
-	double Train();
+	vector<double> Train();
 	void Test(vector<double>);
 	double Output(int i);
 	void Save();

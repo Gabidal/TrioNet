@@ -43,14 +43,28 @@ int main() {
     n.Generate_Data_Set(Fibonakki, 1, 2, 30);
     vector<double> costs;
     n.Load();
-    for (int i = 0; i < 1000000; i++) {
-        double result = n.Train();
+    clock_t begin = clock();
+    int i = 0;
+    while(true) {
+        vector<double> result = n.Train();
         if (i % 100 == 0) {
-            costs.push_back(result);
+            costs.push_back(accumulate(result.begin(), result.end(), 0.0) / result.size());
         }
-        if (i % 10000 == 0) {
-            cout << result * 100 << "%" << endl;
+        if (i % 100000 == 0) {
+            for (int j = 0; j < result.size(); j++) {
+                cout << j << "=" << result.at(j) * 100 << "%, ";
+                if (j % 10 == 0) {
+                    cout << endl;
+                }
+            }
+            cout << endl << "==============================================" << endl;
+            cout << "Average " << accumulate(result.begin(), result.end(), 0.0) / result.size() * 100 << "%" << endl;
+            cout << "==============================================" << endl;
         }
+        if ((clock() - begin) / CLOCKS_PER_SEC > 60) {
+            break;
+        }
+        i++;
     }
     n.Save();
     ofstream cost_export("cost_function.csv");

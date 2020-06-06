@@ -111,13 +111,13 @@ void NN::Generate_Data_Set(vector<double>(*function) (vector<double>), int Param
 		Expected_Map.at(i) /= Divider;
 }
 
-double NN::Train()
+vector<double> NN::Train()
 {
 	if ((Input_Map.size() % Layers.at(0)->Height != 0) || (Expected_Map.size() % Layers.at(Layers.size() - 1)->Height != 0) ||
 		(Input_Map.size() / Layers.at(0)->Height) != (Expected_Map.size() / Layers.at(Layers.size() - 1)->Height)) {
-		return -1;
+		return { -1};
 	}
-	double Average_Percentage_Error = 0;
+	vector<double> Average_Percentage_Error;
 	int Input_Iterator = 0;
 	int Output_Iterator = 0;
 	while (Input_Iterator < Input_Map.size())
@@ -125,7 +125,7 @@ double NN::Train()
 		vector<double> Input(Input_Map.begin() + Input_Iterator, Input_Map.begin() + Layers.at(0)->Height + Input_Iterator);
 		vector<double> Output(Expected_Map.begin() + Output_Iterator, Expected_Map.begin() + Layers.at(Layers.size() - 1)->Height + Output_Iterator);
 		Test(Input);
-		Average_Percentage_Error += Back_Propagate(Output);
+		Average_Percentage_Error.push_back(Back_Propagate(Output));
 		Input_Iterator += Layers.at(0)->Height;
 		Output_Iterator += Layers.at(Layers.size() - 1)->Height;
 	}
@@ -138,7 +138,7 @@ double NN::Train()
 			}
 		}
 	}*/
-	return Average_Percentage_Error / (Input_Map.size() / Layers.at(0)->Height);
+	return Average_Percentage_Error;
 }
 
 int NN::Get_Exponent_Value(double value)
@@ -163,7 +163,7 @@ double NN::Back_Propagate(vector<double> Expected)
 	//first loop every last layer backwards
 	for (int j = 0; j < Layers.back()->Nodes.size(); j++) {
 		Layers.back()->Nodes.at(j).Error = Expected.at(j) - Layers.back()->Nodes.at(j).Data;
-		Average_Percentage_Error += abs(Layers.back()->Nodes.at(j).Error / Expected.at(j));
+		Average_Percentage_Error += abs(Layers.back()->Nodes.at(j).Data / Expected.at(j));
 	}
 	//calculate the error
 	for (int i = Layers.size() - 1; i >= 0; i--) {
