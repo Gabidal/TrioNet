@@ -30,27 +30,12 @@
     <ClCompile Include="Cpp\NN\NN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Cpp\Activattors\Activattors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="h\mem\Mem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="h\tensor\tensorflow\c\c_api.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="h\tensor\tensorflow\c\tf_attrtype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="h\tensor\tensorflow\c\tf_datatype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="h\tensor\tensorflow\c\tf_status.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="h\tensor\tensorflow\c\tf_tensor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="h\tensor\tensorflow\c\eager\c_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="out\build\x64-debug (default)\cmakefiles\showincludes\foo.h">
@@ -66,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="H\NN\NN.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="H\Activattors\Activattors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

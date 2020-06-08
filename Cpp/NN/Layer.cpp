@@ -1,5 +1,4 @@
 #include "../../H/NN/Layer.h"
-constexpr double e = 2.718281828;//45904523536028747135266249775724709369995;
 
 Layer::Layer(bool new_weights, int height)
 {
@@ -51,7 +50,7 @@ void Layer::Update()
 {
 	for (Node& i : Nodes)
 		if (i.Connections.size() > 0)
-			i.Data = Activate(Sum(i));
+			i.Data = i.Activation_Function(Sum(i));
 	return;
 }
 
@@ -64,18 +63,19 @@ double Layer::Sum(Node& n)
 	return Result + n.Bias;
 }
 
-double Layer::Activate(double Sum)
+void Layer::Mutate()
 {
-	//(1) / (1 + e ^ (-0.01 x)) * 2 - 1
-	//return (1 / (1 + pow(e, (-Sensitivity * Sum))));
-	return 1 / (1 + pow(e, -Sum));
-}
-
-double Layer::Derivate(double Data)
-{
-	//(2e^(-Sensitivity*Data)Sensitivity)/((e^(-Sensitivity*Data)+1)^2)
-	//return (2*pow(e, -Sensitivity*Data)*Sensitivity)/(pow(pow(e, -Sensitivity*Data)+1, 2));
-	return Data * (1.0 - Data);
+	for (Node& i : Nodes) {
+		int x = rand() % 10;
+		if (x > 5) {
+			i.Activation_Function = Activattors::Sigmoid_Activate;
+			i.Derivation_Function = Activattors::Sigmoid_Derivate;
+		}
+		else if (x < 2)  {
+			i.Activation_Function = Activattors::RELU_Activate;
+			i.Derivation_Function = Activattors::RELU_Derivate;
+		}
+	}
 }
 
 double Layer::Generate_Weight()

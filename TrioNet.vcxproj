@@ -71,8 +71,8 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Quanf\source\repos\TrioNet\H\Tensor;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Quanf\source\repos\TrioNet\Cpp\Tensor;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -107,10 +107,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>tensorflow.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cpp\Activattors\Activattors.cpp" />
     <ClCompile Include="cpp\main.cpp" />
     <ClCompile Include="cpp\mem\Mem.cpp" />
     <ClCompile Include="Cpp\NN\Layer.cpp" />
@@ -118,17 +119,12 @@
     <ClCompile Include="Cpp\NN\Node.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="H\Activattors\Activattors.h" />
     <ClInclude Include="h\mem\Mem.h" />
     <ClInclude Include="H\NN\Layer.h" />
     <ClInclude Include="H\NN\Connection.h" />
     <ClInclude Include="H\NN\NN.h" />
     <ClInclude Include="H\NN\Node.h" />
-    <ClInclude Include="h\tensor\tensorflow\c\c_api.h" />
-    <ClInclude Include="h\tensor\tensorflow\c\eager\c_api.h" />
-    <ClInclude Include="h\tensor\tensorflow\c\tf_attrtype.h" />
-    <ClInclude Include="h\tensor\tensorflow\c\tf_datatype.h" />
-    <ClInclude Include="h\tensor\tensorflow\c\tf_status.h" />
-    <ClInclude Include="h\tensor\tensorflow\c\tf_tensor.h" />
     <ClInclude Include="out\build\x64-debug (default)\cmakefiles\showincludes\foo.h" />
   </ItemGroup>
   <ItemGroup>

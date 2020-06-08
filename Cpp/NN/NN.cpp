@@ -29,7 +29,7 @@ void NN::Test(vector<double> Input) {
 		exit(1);
 	}
 	for (int i = 0; i < Input.size(); i++)
-		Layers.at(0)->Nodes.at(i).Data = Input.at(i) / Input_Format;
+		Layers.at(0)->Nodes.at(i).Data = Input.at(i);// / Input_Format;
 	Feed_Foward();
 	return;
 }
@@ -42,13 +42,13 @@ void NN::Append(vector<double>& dest, vector<double> source)
 
 double NN::Output(int i)
 {
-	return Layers.back()->Nodes.at(i).Data * Output_Format;
+	return Layers.back()->Nodes.at(i).Data;// * Output_Format;
 }
 
-void NN::Save()
+void NN::Save(string filename)
 {
-	system("del Saved_Weights.txt");
-	ofstream File("Saved_Weights.txt");
+	system(((string)"del " + filename).c_str());
+	ofstream File(filename);
 	for (Layer* x : Layers) {
 		for (Node& y : x->Nodes) {
 			for (Connection& z : y.Connections) {
@@ -59,9 +59,9 @@ void NN::Save()
 	File.close();
 }
 
-void NN::Load()
+void NN::Load(string filename)
 {
-	ifstream File("Saved_Weights.txt");
+	ifstream File(filename);
 	if (File.is_open()) {
 		for (Layer* x : Layers) {
 			for (Node& y : x->Nodes) {
@@ -79,14 +79,9 @@ void NN::Load()
 	return;
 }
 
-void NN::Clean_Data_Set()
-{
-	Input_Map.clear();
-	Expected_Map.clear();
-}
-
 void NN::Generate_Data_Set(vector<double>(*function) (vector<double>), int Parameter_amount, int min, int max)
 {
+	/*
 	for (int i = min; i < max;) {
 		vector<double> Input;
 		for (int j = 0; j < Parameter_amount; j++) {
@@ -109,35 +104,29 @@ void NN::Generate_Data_Set(vector<double>(*function) (vector<double>), int Param
 	Output_Format = Divider;
 	for (int i = 0; i < Expected_Map.size(); i++)
 		Expected_Map.at(i) /= Divider;
+		*/
 }
 
-vector<double> NN::Train()
+double NN::Train()
 {
-	if ((Input_Map.size() % Layers.at(0)->Height != 0) || (Expected_Map.size() % Layers.at(Layers.size() - 1)->Height != 0) ||
-		(Input_Map.size() / Layers.at(0)->Height) != (Expected_Map.size() / Layers.at(Layers.size() - 1)->Height)) {
+	if ((Input_Map->size() % Layers.at(0)->Height != 0) || (Expected_Map->size() % Layers.at(Layers.size() - 1)->Height != 0) ||
+		(Input_Map->size() / Layers.at(0)->Height) != (Expected_Map->size() / Layers.at(Layers.size() - 1)->Height)) {
 		return { -1};
 	}
-	vector<double> Average_Percentage_Error;
+	double Average_Percentage_Error = 0;
 	int Input_Iterator = 0;
 	int Output_Iterator = 0;
-	while (Input_Iterator < Input_Map.size())
+	while (Input_Iterator < Input_Map->size())
 	{
-		vector<double> Input(Input_Map.begin() + Input_Iterator, Input_Map.begin() + Layers.at(0)->Height + Input_Iterator);
-		vector<double> Output(Expected_Map.begin() + Output_Iterator, Expected_Map.begin() + Layers.at(Layers.size() - 1)->Height + Output_Iterator);
+		vector<double> Input(Input_Map->begin() + Input_Iterator, Input_Map->begin() + Layers.at(0)->Height + Input_Iterator);
+		vector<double> Output(Expected_Map->begin() + Output_Iterator, Expected_Map->begin() + Layers.at(Layers.size() - 1)->Height + Output_Iterator);
 		Test(Input);
-		Average_Percentage_Error.push_back(Back_Propagate(Output));
+		Average_Percentage_Error += Back_Propagate(Output);
 		Input_Iterator += Layers.at(0)->Height;
 		Output_Iterator += Layers.at(Layers.size() - 1)->Height;
 	}
-
-	/*for (Layer* x : Layers) {
-		for (Node& y : x->Nodes) {
-			for (Connection& z : y.Connections) {
-				z.Weight += accumulate(z.Changes.begin(), z.Changes.end(), 0.0) / z.Changes.size();
-				z.Changes.clear();
-			}
-		}
-	}*/
+	//figure the learning rate
+	Learning_Rate = Average_Percentage_Error * 0.8;
 	return Average_Percentage_Error;
 }
 
@@ -163,13 +152,14 @@ double NN::Back_Propagate(vector<double> Expected)
 	//first loop every last layer backwards
 	for (int j = 0; j < Layers.back()->Nodes.size(); j++) {
 		Layers.back()->Nodes.at(j).Error = Expected.at(j) - Layers.back()->Nodes.at(j).Data;
-		Average_Percentage_Error += abs(Layers.back()->Nodes.at(j).Data / Expected.at(j));
+		//Average_Percentage_Error += abs(Layers.back()->Nodes.at(j).Data / Expected.at(j));
+		Average_Percentage_Error += abs(Layers.back()->Nodes.at(j).Error);
 	}
 	//calculate the error
 	for (int i = Layers.size() - 1; i >= 0; i--) {
 		for (int j = 0; j < Layers.at(i)->Nodes.size(); j++) {
 			Node& Node = Layers.at(i)->Nodes.at(j);
-			Node.Delta = Layers.at(i)->Derivate(Node.Data) * Node.Error;
+			Node.Delta = Node.Derivation_Function(Node.Data) * Node.Error;
 			for (Connection c : Node.Connections) {
 				c.Other->Error += Node.Delta * c.Weight;
 			}
@@ -181,11 +171,19 @@ double NN::Back_Propagate(vector<double> Expected)
 		for (Node& y : x->Nodes) {
 			for (Connection& z : y.Connections) {
 				//z.Changes.push_back(0.1 * y.Delta * (z.Other->Data));
-				z.Weight += 0.1 * y.Delta * z.Other->Data;
+				z.Weight += Learning_Rate * y.Delta * z.Other->Data;
 			}
 		}
 	}
-	return Average_Percentage_Error / Layers.back()->Nodes.size();
+	//return Average_Percentage_Error / Layers.back()->Nodes.size();
+	return Average_Percentage_Error;
+}
+
+void NN::Mutate()
+{
+	//we have the original weights and want this NN to differ from the original
+	for (Layer* i : Layers)
+		i->Mutate();
 }
 
 void NN::Feed_Foward() {

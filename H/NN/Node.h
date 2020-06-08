@@ -3,6 +3,7 @@
 #include <math.h>
 #include <vector>
 #include "Connection.h"
+#include "../Activattors/Activattors.h"
 
 using namespace std;
 
@@ -16,6 +17,8 @@ public:
 	double Data = 1;
 	double Delta = 0;
 	double Error = 0;
+	double(*Activation_Function) (double) = Activattors::Sigmoid_Activate;
+	double(*Derivation_Function) (double) = Activattors::Sigmoid_Derivate;
 	vector<Connection> Connections;
 };
 

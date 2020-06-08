@@ -21,9 +21,8 @@ public:
 	void Update();
 	vector<Node> Nodes;
 	double Sensitivity = 1;
-	double Activate(double Data);
-	double Derivate(double Data);
 	int Height = 0;
+	void Mutate();
 private:
 	bool New_Weights = false;
 	//map<double, vector<Connection*>> Previus_Usage;
