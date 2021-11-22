@@ -27,22 +27,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -111,21 +111,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Cpp\Activattors\Activattors.cpp" />
     <ClCompile Include="cpp\main.cpp" />
-    <ClCompile Include="cpp\mem\Mem.cpp" />
-    <ClCompile Include="Cpp\NN\Layer.cpp" />
-    <ClCompile Include="Cpp\NN\NN.cpp" />
-    <ClCompile Include="Cpp\NN\Node.cpp" />
+    <ClCompile Include="Cpp\NN.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="H\Activattors\Activattors.h" />
-    <ClInclude Include="h\mem\Mem.h" />
-    <ClInclude Include="H\NN\Layer.h" />
-    <ClInclude Include="H\NN\Connection.h" />
+    <ClInclude Include="H\NN.h" />
     <ClInclude Include="H\NN\NN.h" />
-    <ClInclude Include="H\NN\Node.h" />
-    <ClInclude Include="out\build\x64-debug (default)\cmakefiles\showincludes\foo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
