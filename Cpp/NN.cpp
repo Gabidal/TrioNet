@@ -3,7 +3,9 @@
 NN::NN(int Height, int Width){
     this->Height = Height;
     this->Width = Width;
-    this->Nodes = new double[Height * Width];
+    for (int i = 0; i < Width * Height; i++){
+        Nodes.push_back(new Node());
+    }
     //Initialize the input and output nodes, the input node being the first node and the output node being the last node.
     this->Inputs_Node_Indices.push_back(0);
     this->Outputs_Node_Indices .push_back(Height * Width - 1);
@@ -14,6 +16,8 @@ NN::NN(int Height, int Width){
             Add_Connection_Random();
         }
     }
+
+    Update_Connections();
 }
 
 void NN::Save_Weights(string fileName)
@@ -56,6 +60,10 @@ void NN::Add_Connection_Random(){
 
 double NN::Sigmoid(double x){
     return 1.0 / (1.0 + exp(-x));
+}
+
+double NN::Sigmoid_Derivative(double x){
+    return x * (1 - x);
 }
 
 void NN::Resize_Input_Vector(int Input){
@@ -110,24 +118,38 @@ void NN::Resize_Output_Vector(int Output){
     }
 }
 
+void NN::Update_Connections(){
+    for (auto *i : Connections){
+        Nodes[i->dest]->Connections.push_back(i);
+    }
+}
+
+void Node::Feed_Forward(NN* nn){
+    double sum = 0;
+    for (auto *i : Connections){
+        sum += i->weight * nn->Nodes[i->src]->Value;
+    }
+    Value = nn->Sigmoid(sum);
+}
+
 vector<double> NN::Feed_Forward(vector<double> Inputs)
 {
     Resize_Input_Vector(Inputs.size());
     //Set the input nodes to the input values
     for (int i = 0; i < Inputs.size(); i++)
     {
-        Nodes[Inputs_Node_Indices[i]] = Inputs[i];
+        Nodes[Inputs_Node_Indices[i]]->Value = Inputs[i];
     }
-    //Feed forward
-    for (int i = 0; i < Connections.size(); i++)
+    //Feed forward the information from the connections a node has.
+    for (int i = 0; i < Height * Width; i++)
     {
-        Nodes[Connections[i]->dest] = Sigmoid(Nodes[Connections[i]->src] * Connections[i]->weight);
+        Nodes[i]->Feed_Forward(this);
     }
     //Return the output nodes
     vector<double> Outputs;
     for (int i = 0; i < Outputs_Node_Indices.size(); i++)
     {
-        Outputs.push_back(Nodes[Outputs_Node_Indices[i]]);
+        Outputs.push_back(Nodes[Outputs_Node_Indices[i]]->Value);
     }
     return Outputs;
 }
@@ -190,7 +212,7 @@ vector<double> NN::Back_Propagation(vector<double> Expected_Outputs)
     vector<double> Errors;
     for (int i = 0; i < Outputs_Node_Indices.size(); i++)
     {
-        Errors.push_back(Expected_Outputs[i] - Nodes[Outputs_Node_Indices[i]]);
+        Errors.push_back(Expected_Outputs[i] - Nodes[Outputs_Node_Indices[i]]->Value);
     }
     //find the connections that connect to the output nodes
     vector<Connection*> Previus_Connections;
@@ -201,17 +223,32 @@ vector<double> NN::Back_Propagation(vector<double> Expected_Outputs)
             }
         }
     }
+    
+    //Go through the Previus_Connections like a recussive function.
+    while (true){
+        for (auto i : Inputs_Node_Indices){
+            for (auto j : Previus_Connections){
+                if (j->src == i){
+                    break;
+                }
+            }
+        }
+        if (Previus_Connections.size() == 0){
+            break;
+        }
 
+        //Here we calculate the error for each node.
+        for (int i = 0; i < Previus_Connections.size(); i++)
+        {
+            double sum = 0;
+            for (int j = 0; j < Previus_Connections.size(); j++)
+            {
+                sum += Previus_Connections[j]->weight * Errors[j];
+            }
+            Errors.push_back(sum * Sigmoid_Derivative(Nodes[Previus_Connections[i]->src]->Value));
+        }
 
-    //now we can iterate through the connections and update the weights
-    for (int i = 0; i < Previus_Connections.size(); i++)
-    {
-        //calculate the error for the connection
-        double Error = Errors[i] * Previus_Connections[i]->weight;
-        //calculate the gradient of the error
-        double Gradient = Error * Previus_Connections[i]->weight * (1 - Previus_Connections[i]->weight);
-        //update the weight
-        Previus_Connections[i]->weight += Learning_Rate * Gradient;
+        Previus_Connections = Get_Previus_Connections(Previus_Connections);
     }
 
     //Calculate the error for each input node
@@ -227,10 +264,11 @@ vector<double> NN::Back_Propagation(vector<double> Expected_Outputs)
         }
         Errors.push_back(error);
     }
+    
     //Update the weights
     for (int i = 0; i < Connections.size(); i++)
     {
-        Connections[i]->weight += Connections[i]->error * Nodes[Connections[i]->src];
+        Connections[i]->weight += Connections[i]->error * Nodes[Connections[i]->src]->Value;
     }
     return Errors;
 }

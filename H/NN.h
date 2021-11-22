@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -20,13 +21,23 @@ class Connection{
         
 };
 
+class NN;
+
+class Node{
+    public:
+        double Value;
+        vector<Connection*> Connections;
+
+        void Feed_Forward(NN* nn);
+};
+
 //imagine a 2D grid of nodes.
 //In this grid the nodes are handled by indices.
 //The indices are used to access the nodes in the grid.
 //The connections work by these indices. 
 class NN{
     public:
-        double* Nodes;
+        vector<Node*> Nodes;
         //To prevent data copying use pointers.
         vector<Connection*> Connections;
         //We want to make the output and the intput nodes to be runtime determine.
@@ -64,6 +75,11 @@ class NN{
         //The function returns the activated value.
         double Sigmoid(double x);
 
+        //This function is the sigmoid derivative function.
+        //The derivative of the sigmoid function is 1/(1+e^-x)^2
+        //The function returns the derivative value.
+        double Sigmoid_Derivative(double x);
+
         //This function detects if the input vector is larger than the input node indices.
         //If true then this function resizes the input vector to the size of the input node indices.
         void Resize_Input_Vector(int input);
@@ -71,6 +87,9 @@ class NN{
         //This function detects if the output vector is larger than the output node indices.
         //If true then this function resizes the output vector to the size of the output node indices.
         void Resize_Output_Vector(int output);
+
+        //This function goes through the connecions and updates the connections to the correspondong nodes connections.
+        void Update_Connections();
 
         //This function does the feed forward calculation.
         //The input is the input vector.
