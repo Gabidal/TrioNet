@@ -1,2 +1,2 @@
 # TrioNet
-Fina NN
+A fun little project.

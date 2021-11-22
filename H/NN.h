@@ -94,4 +94,9 @@ class NN{
         //If not then use the resize function to resize the output vector.
         vector<double> Back_Propagation(vector<double> Output);
 
+        //This function goes backwards through a given list of connections and returns the next list of connections.
+        //The input is the list of connections.
+        //The output is the list of connections.
+        vector<Connection*> Get_Previus_Connections(vector<Connection*> Connections);
+
 };

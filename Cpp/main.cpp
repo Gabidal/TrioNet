@@ -1,6 +1,7 @@
 #include "../H/NN.h"
 
-constexpr double ACCURACY = 0.01;
+//how many times the data set is looped through
+constexpr int ACCURACY = 1;
 
 vector<double> Sum(vector<double> in)
 {

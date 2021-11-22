@@ -7,6 +7,13 @@ NN::NN(int Height, int Width){
     //Initialize the input and output nodes, the input node being the first node and the output node being the last node.
     this->Inputs_Node_Indices.push_back(0);
     this->Outputs_Node_Indices .push_back(Height * Width - 1);
+
+    //Generate random connections between the nodes.
+    for (int i = 0; i < Height; i++){
+        for (int j = 0; j < Width; j++){
+            Add_Connection_Random();
+        }
+    }
 }
 
 void NN::Save_Weights(string fileName)
@@ -150,12 +157,30 @@ void NN::Train(vector<pair<vector<double>, vector<double>>> Training_Data, int e
 {
     for (int i = 0; i < epochs; i++)
     {
+        int Avg = 0;
         for (int j = 0; j < Training_Data.size(); j++)
         {
             Feed_Forward(Training_Data[j].first);
-            Back_Propagation(Training_Data[j].second);
+            vector<double> Errors = Back_Propagation(Training_Data[j].second);
+            for (auto i : Errors)
+                Avg += i;
+            Avg /= Errors.size();
+        }
+        cout << to_string(Avg) << endl;
+    }
+}
+
+vector<Connection*> NN::Get_Previus_Connections(vector<Connection*> Input)
+{
+    vector<Connection*> Result;
+    for (auto i : Input){
+        for (auto c : Connections){
+            if (i->src == c->dest){
+                Result.push_back(c);
+            }
         }
     }
+    return Result;
 }
 
 vector<double> NN::Back_Propagation(vector<double> Expected_Outputs)
@@ -167,11 +192,28 @@ vector<double> NN::Back_Propagation(vector<double> Expected_Outputs)
     {
         Errors.push_back(Expected_Outputs[i] - Nodes[Outputs_Node_Indices[i]]);
     }
-    //Calculate the error for each connection
-    for (int i = 0; i < Connections.size(); i++)
-    {
-        Connections[i]->error = Errors[Connections[i]->dest / Width] * Nodes[Connections[i]->src];
+    //find the connections that connect to the output nodes
+    vector<Connection*> Previus_Connections;
+    for (auto i : Connections){
+        for (auto j : Outputs_Node_Indices){
+            if (i->dest == j){
+                Previus_Connections.push_back(i);
+            }
+        }
     }
+
+
+    //now we can iterate through the connections and update the weights
+    for (int i = 0; i < Previus_Connections.size(); i++)
+    {
+        //calculate the error for the connection
+        double Error = Errors[i] * Previus_Connections[i]->weight;
+        //calculate the gradient of the error
+        double Gradient = Error * Previus_Connections[i]->weight * (1 - Previus_Connections[i]->weight);
+        //update the weight
+        Previus_Connections[i]->weight += Learning_Rate * Gradient;
+    }
+
     //Calculate the error for each input node
     for (int i = 0; i < Inputs_Node_Indices.size(); i++)
     {
