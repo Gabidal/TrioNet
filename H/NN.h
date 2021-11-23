@@ -18,7 +18,7 @@ class Connection{
 
         Connection(int src, int dest, double weight);
 
-        
+        Connection() {}
 };
 
 class NN;
@@ -52,12 +52,12 @@ class NN{
         //Make a function that can load the weights from a file.
         //The first section tells the src node index, the second section tells the dest node index, and the third section tells the weight.
         //These sections are seperated by commad
-        void Save_Weights(string fileName);
+        void Save_Weights(string fileName, const char** argv);
 
         //Make a function that can load the weights from a file.
         //The first section tells the src node index, the second section tells the dest node index, and the third section tells the weight.
         //These sections are seperated by commad
-        void Load_Weights(string fileName);
+        void Load_Weights(string fileName, const char** argv);
 
         //This function is used to add a connection to the neural network.
         //The connection is added to the vector of connections.
@@ -105,6 +105,9 @@ class NN{
         //This function will train the neural network besed on the training data set that we just generated.
         //The training data set is a list of inputs and outputs.
         void Train(vector<pair<vector<double>, vector<double>>> Data, int epochs);
+
+        //This function tries to find the shortest path to the start
+        vector<Node*> Find_Path(Connection* c);
 
         //This function does the backpropagation calculation.
         //The input is the output vector.
