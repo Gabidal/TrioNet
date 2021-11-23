@@ -13,8 +13,6 @@ class Connection{
         int src;
         int dest;
         double weight;
-        double deltaWeight;
-        double error;
 
         Connection(int src, int dest, double weight);
 
@@ -25,7 +23,7 @@ class NN;
 
 class Node{
     public:
-        double Value;
+        double Value = 1;
         vector<Connection*> Connections;
 
         void Feed_Forward(NN* nn);
@@ -100,14 +98,14 @@ class NN{
 
         //This function can get a function pointter that is used to generate the training data set.
         //The function pointer gets a list of inputs and then return a list of outputs.
-        vector<pair<vector<double>, vector<double>>> Get_Training_Data(vector<double> (*Generate_Training_Data)(vector<double>), int in, int out);
+        vector<pair<vector<double>, vector<double>>> Get_Training_Data(vector<double> (*Generate_Training_Data)(vector<double>), int in, int out, int Batch);
 
         //This function will train the neural network besed on the training data set that we just generated.
         //The training data set is a list of inputs and outputs.
         void Train(vector<pair<vector<double>, vector<double>>> Data, int epochs);
 
         //This function tries to find the shortest path to the start
-        vector<Node*> Find_Path(Connection* c);
+        vector<Connection*> Find_Path(Connection* c);
 
         //This function does the backpropagation calculation.
         //The input is the output vector.
