@@ -33,7 +33,4 @@
   <ItemGroup>
     <None Include=".gitignore" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="x64\Debug\Saved_Weights.txt" />
-  </ItemGroup>
 </Project>

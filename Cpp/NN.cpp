@@ -1,6 +1,6 @@
 #include "../H/NN.h"
 
-constexpr double Learning_Rate = 0.01;
+constexpr double Learning_Rate = 0.0001;
 
 NN::NN(int Height, int Width){
     this->Height = Height;
@@ -173,7 +173,7 @@ void Node::Feed_Forward(NN* nn){
     for (auto *i : Connections){
         sum += i->weight * nn->Nodes[i->src]->Value - 1;
     }
-    Value = /*nn->Sigmoid(sum);*/ sum;
+    Value = nn->Sigmoid(sum);
 }
 
 vector<double> NN::Feed_Forward(vector<double> Inputs)
@@ -211,7 +211,7 @@ vector<pair<vector<double>, vector<double>>> NN::Get_Training_Data(vector<double
 
         for (int i = 0; i < in; i++)
         {
-            Input.push_back(/*(double)rand() / RAND_MAX*/ 1);
+            Input.push_back((double)rand() / RAND_MAX);
         }
         Output = Generate_Training_Data(Input);
         Training_Data.push_back({Input, Output});
@@ -221,19 +221,45 @@ vector<pair<vector<double>, vector<double>>> NN::Get_Training_Data(vector<double
 
 void NN::Train(vector<pair<vector<double>, vector<double>>> Training_Data, int Iterations)
 {
+    vector<vector<Connection*>> Node_Path;
+    //Try to path find through the connections, a conneciton that starts from a certain input node, and end in a certain output node.
+    //Gather these connections into a list, this list will be back propagated.
+    for (auto Output : Outputs_Node_Indices) {
+        vector<Connection*> Single_Path;
+        bool No_Connection = true;
+        while (No_Connection) {
+            for (auto Con : Nodes[Output]->Connections) {
+                for (auto Path : Find_Path(Con)) {
+                    Single_Path.push_back(Path);
+                }
+            }
+            if (Single_Path.size() == 0) {
+                //This means that there were no connections from the output node to the input node.
+                //Thus we need to create a random connection.
+                Add_Connection_Random();
+            }
+            else {
+                No_Connection = false;
+            }
+        }
+        Node_Path.push_back(Single_Path);
+    }
     for (int i = 0; i < Iterations; i++)
     {
         double Avg = 0;
         for (int j = 0; j < Training_Data.size(); j++)
         {
             Feed_Forward(Training_Data[j].first);
-            vector<double> Errors = Back_Propagation(Training_Data[j].second);
+            vector<double> Errors = Back_Propagation(Training_Data[j].second, Node_Path);
             for (auto i : Errors)
                 Avg += i;
             Avg /= Errors.size();
         }
         cout << "Error: " + to_string(Avg) + "%" << endl;
     }
+    cout << "All connections count: " << Connections.size() << endl;
+    Clean_Dum_Connections();
+    cout << "True connections count: " << Connections.size() << endl;
 }
 
 vector<Connection*> Trace;
@@ -259,8 +285,20 @@ vector<Connection*> NN::Find_Path(Connection* c)
 
     Trace.push_back(c);
     for (auto *i : Connections) {
-        for (auto j : Find_Path(i)) {
-            Result.push_back(j);
+        if (i->Dum)
+            continue;
+        for (auto j : Inputs_Node_Indices) {
+            int Self_Distance = abs(j - c->src);
+            int Connection_Distance = abs(j - i->src);
+
+            if (Connection_Distance < Self_Distance) {
+                for (auto k : Find_Path(i)) {
+                    Result.push_back(k);
+                }
+            }
+            else {
+                i->Dum = true;
+            }
         }
     }
     Trace.pop_back();
@@ -285,40 +323,11 @@ vector<Connection*> NN::Get_Previus_Connections(vector<Connection*> Input)
     return Result;
 }
 
-vector<double> NN::Back_Propagation(vector<double> Expected_Outputs)
+vector<double> NN::Back_Propagation(vector<double> Expected_Outputs, vector<vector<Connection*>> Node_Path)
 {
-    //Make sure the size of the expected outputs vector is the same as the number of outputs.
-    //We dont want to shrink the output nor input node count, this is because the left over nodes are experiences.
-    Resize_Output_Vector(Expected_Outputs.size());
-
-    //Try to path find through the connections, a conneciton that starts from a certain input node, and end in a certain output node.
-    //Gather these connections into a list, this list will be back propagated.
-    vector<vector<Connection*>> Node_Path;
-
-    for (auto Output : Outputs_Node_Indices) {
-        vector<Connection*> Single_Path;
-        bool No_Connection = true;
-        while (No_Connection){
-            for (auto Con : Nodes[Output]->Connections) {
-                for (auto Path : Find_Path(Con)) {
-                    Single_Path.push_back(Path);
-                }
-            }
-            if (Single_Path.size() == 0){
-                //This means that there were no connections from the output node to the input node.
-                //Thus we need to create a random connection.
-                Add_Connection_Random();
-            }
-            else{
-                No_Connection = false;
-            }
-        }
-        Node_Path.push_back(Single_Path);
-    }
-
     vector<double> Errors;
     for (int i = 0; i < Node_Path.size(); i++) {
-        double Error = Expected_Outputs[i] - Nodes[Node_Path[i][Node_Path[i].size() - 1]->dest]->Value;
+        double Error = Expected_Outputs[i] - (Nodes[Node_Path[i][Node_Path[i].size() - 1]->dest]->Value * 10);
         Errors.push_back(Error);
         //find the most active connection of this path, and nuge it to the directions of the error vector.
         Connection* Most_Active_Connection = Node_Path[i][Node_Path[i].size() - 1];
@@ -328,7 +337,7 @@ vector<double> NN::Back_Propagation(vector<double> Expected_Outputs)
                 Most_Active_Connection = j;
         }
         //this most active connection's weight is nudged by the Learning rate.
-        Most_Active_Connection->weight += Error * Learning_Rate;
+        Most_Active_Connection->weight = Sigmoid(Most_Active_Connection->weight + Error * Learning_Rate);
     }
     return Errors;
 }
@@ -338,4 +347,13 @@ Connection::Connection(int src, int dest, double weight)
     this->src = src;
     this->dest = dest;
     this->weight = weight;
+}
+
+void NN::Clean_Dum_Connections()
+{
+    for (int i = 0; i < Connections.size(); i++) {
+        if (Connections[i]->Dum) {
+            Connections.erase(Connections.begin() + i);
+        }
+    }
 }
