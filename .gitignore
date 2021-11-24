@@ -3,5 +3,4 @@ x64/
 *.obj
 out/
 .vs/
-tensorflow.dll
-Debug/
+*.pdb

@@ -12,11 +12,11 @@ vector<double> Sum(vector<double> in)
 int main(int argc, const char** argv){
     NN nn(10, 10);
     cout << "Loading Weights" << endl;
-    nn.Load_Weights("Saved_Weights.txt", argv);
+    nn.Load_Weights("Saved_Weights.txt");
     cout << "Training AI..." << endl;
     nn.Train(nn.Get_Training_Data(Sum, 2, 1, BATCH_SIZE), ACCURACY);
     cout << "Saving Weights" << endl;
-    nn.Save_Weights("Saved_Weights.txt", argv);
+    nn.Save_Weights("Saved_Weights.txt");
 
     return 0;
 }

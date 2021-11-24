@@ -10,14 +10,9 @@ NN::NN(int Height, int Width){
     }
 }
 
-void NN::Save_Weights(string fileName, const char** argv)
+void NN::Save_Weights(string fileName)
 {
-    string Dir = string(argv[0]);
-    int Last_Slash = Dir.find_last_of('\\');
-
-    Dir = Dir.substr(0, Last_Slash + 1);
-
-    std::ofstream file(Dir + fileName, std::ios::binary);
+    std::ofstream file("../../" + fileName, std::ios::binary);
     if (!file.is_open()) {
         cout << "Cant open file " + fileName << endl;
     }
@@ -32,15 +27,9 @@ void NN::Save_Weights(string fileName, const char** argv)
     file.close();
 }
 
-void NN::Load_Weights(string fileName, const char** argv)
+void NN::Load_Weights(string fileName)
 {
-
-    string Dir = string(argv[0]);
-    int Last_Slash = Dir.find_last_of('\\');
-
-    Dir = Dir.substr(0, Last_Slash + 1);
-
-    std::ifstream file(Dir + fileName, std::ios::binary);
+    std::ifstream file("../../" + fileName, std::ios::binary);
     if (!file.is_open()) {
         cout << "Cant open file " + fileName << endl;
     }

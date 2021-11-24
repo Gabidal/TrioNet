@@ -51,12 +51,12 @@ class NN{
         //Make a function that can load the weights from a file.
         //The first section tells the src node index, the second section tells the dest node index, and the third section tells the weight.
         //These sections are seperated by commad
-        void Save_Weights(string fileName, const char** argv);
+        void Save_Weights(string fileName);
 
         //Make a function that can load the weights from a file.
         //The first section tells the src node index, the second section tells the dest node index, and the third section tells the weight.
         //These sections are seperated by commad
-        void Load_Weights(string fileName, const char** argv);
+        void Load_Weights(string fileName);
 
         //This function is used to add a connection to the neural network.
         //The connection is added to the vector of connections.
