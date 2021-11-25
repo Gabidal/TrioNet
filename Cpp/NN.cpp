@@ -3,6 +3,7 @@
 constexpr double Learning_Rate = 0.0001;
 
 NN::NN(int Height, int Width){
+    srand(time(NULL));
     this->Height = Height;
     this->Width = Width;
     for (int i = 0; i < Width * Height; i++){
@@ -12,12 +13,23 @@ NN::NN(int Height, int Width){
 
 void NN::Save_Weights(string fileName)
 {
-    std::ofstream file("../../" + fileName, std::ios::binary);
+    std::ofstream file(fileName, std::ios::binary);
     if (!file.is_open()) {
         cout << "Cant open file " + fileName << endl;
     }
     else {
-        string Buffer = to_string(Connections.size()) + "\n";
+
+        string Buffer = to_string(Inputs_Node_Indices.size()) + "\n";
+        for (auto i : Inputs_Node_Indices) {
+            Buffer += to_string(i) + "\n";
+        }
+
+        Buffer += to_string(Outputs_Node_Indices.size()) + "\n";
+        for (auto i : Outputs_Node_Indices) {
+            Buffer += to_string(i) + "\n";
+        }
+            
+        Buffer += to_string(Connections.size()) + "\n";
         for (int i = 0; i < Connections.size(); i++)
         {
             Buffer += to_string(Connections[i]->src) + "\n" + to_string(Connections[i]->dest) + "\n" + to_string(Connections[i]->weight) + "\n";
@@ -29,7 +41,7 @@ void NN::Save_Weights(string fileName)
 
 void NN::Load_Weights(string fileName)
 {
-    std::ifstream file("../../" + fileName, std::ios::binary);
+    std::ifstream file(fileName, std::ios::binary);
     if (!file.is_open()) {
         cout << "Cant open file " + fileName << endl;
     }
@@ -52,18 +64,33 @@ void NN::Load_Weights(string fileName)
                 }
             }
 
+            int Input_Node_Count = atoi(Elements[0].c_str());
+            int Output_Node_Count = atoi(Elements[Input_Node_Count+1].c_str());
+
+            for (int i = 0; i < Input_Node_Count; i++) {
+                Inputs_Node_Indices.push_back(atoi(Elements[i+1].c_str()));
+            }
+
+            for (int i = 0; i < Output_Node_Count; i++) {
+                Outputs_Node_Indices.push_back(atoi(Elements[i+1 + Input_Node_Count+1].c_str()));
+            }
+
+            const int Header = Input_Node_Count + 1 + Output_Node_Count + 1;
+
             //the first element is the size of the weights.
-            Connections = vector<Connection*>(atoi(Elements[0].c_str()));
+            Connections = vector<Connection*>(atoi(Elements[Header].c_str()));
             for (auto& i : Connections) {
                 i = new Connection();
             }
 
-            for (int i = 1; i < Elements.size(); i += 3) {
-                Connections[i / 3]->src = atoi(Elements[i].c_str());
-                Connections[i / 3]->dest = atoi(Elements[i + 1].c_str());
-                Connections[i / 3]->weight = atof(Elements[i + 2].c_str());
+            for (int i = Input_Node_Count + 1 + Output_Node_Count + 1 + 1; i < Elements.size(); i += 3) {
+                int Corrected_Index = (i - Header) / 3;
+                
+                Connections[Corrected_Index]->src = atoi(Elements[i].c_str());
+                Connections[Corrected_Index]->dest = atoi(Elements[i + 1].c_str());
+                Connections[Corrected_Index]->weight = atof(Elements[i + 2].c_str());
 
-                Nodes[Connections[i / 3]->dest]->Connections.push_back(Connections[i / 3]);
+                Nodes[Connections[Corrected_Index]->dest]->Connections.push_back(Connections[Corrected_Index]);
             }
         }
     }
@@ -83,6 +110,17 @@ void NN::Add_Connection_Random(){
         src = rand() % (Height * Width);
         dest = rand() % (Height * Width);
     }while(src == dest);
+    weight = ((double)rand() / (RAND_MAX)) * 2 - 1;
+    Add_Connection(src, dest, weight);
+}
+
+void NN::Add_Connection_Random(int dest)
+{
+    int src;
+    double weight;
+    do {
+        src = rand() % (Height * Width);
+    } while (src == dest);
     weight = ((double)rand() / (RAND_MAX)) * 2 - 1;
     Add_Connection(src, dest, weight);
 }
@@ -167,7 +205,6 @@ void Node::Feed_Forward(NN* nn){
 
 vector<double> NN::Feed_Forward(vector<double> Inputs)
 {
-    Resize_Input_Vector(Inputs.size());
     //Set the input nodes to the input values
     for (int i = 0; i < Inputs.size(); i++)
     {
@@ -213,25 +250,28 @@ void NN::Train(vector<pair<vector<double>, vector<double>>> Training_Data, int I
     vector<vector<Connection*>> Node_Path;
     //Try to path find through the connections, a conneciton that starts from a certain input node, and end in a certain output node.
     //Gather these connections into a list, this list will be back propagated.
-    for (auto Output : Outputs_Node_Indices) {
-        vector<Connection*> Single_Path;
-        bool No_Connection = true;
-        while (No_Connection) {
-            for (auto Con : Nodes[Output]->Connections) {
-                for (auto Path : Find_Path(Con)) {
-                    Single_Path.push_back(Path);
+    for (auto Input : Inputs_Node_Indices) {
+        for (auto Output : Outputs_Node_Indices) {
+            vector<Connection*> Single_Path;
+            bool No_Connection = true;
+            while (No_Connection) {
+                for (auto Con : Nodes[Output]->Connections) {
+                    for (auto Path : Find_Path(Con, Input)) {
+                        Single_Path.push_back(Path);
+                    }
+                    if (Single_Path.size() == 0) {
+                        Add_Connection_Random(Con->src);
+                    }
+                }
+                if (Single_Path.size() == 0) {
+                    Add_Connection_Random(Output);
+                }
+                else {
+                    No_Connection = false;
                 }
             }
-            if (Single_Path.size() == 0) {
-                //This means that there were no connections from the output node to the input node.
-                //Thus we need to create a random connection.
-                Add_Connection_Random();
-            }
-            else {
-                No_Connection = false;
-            }
+            Node_Path.push_back(Single_Path);
         }
-        Node_Path.push_back(Single_Path);
     }
     for (int i = 0; i < Iterations; i++)
     {
@@ -252,7 +292,7 @@ void NN::Train(vector<pair<vector<double>, vector<double>>> Training_Data, int I
 }
 
 vector<Connection*> Trace;
-vector<Connection*> NN::Find_Path(Connection* c)
+vector<Connection*> NN::Find_Path(Connection* c, int Input_Index)
 {
     vector<Connection*> Result;
 
@@ -263,31 +303,28 @@ vector<Connection*> NN::Find_Path(Connection* c)
     }
 
     //Check if we have hit the end
-    for (auto i : Inputs_Node_Indices) {
-        if (c->src == i) {
-            Result.push_back(c);
-            return Result;
-        }
+    if (c->src == Input_Index) {
+        Result.push_back(c);
+        return Result;
     }
 
     vector<Connection*> Connections = Nodes[c->src]->Connections;
 
     Trace.push_back(c);
-    for (auto *i : Connections) {
+    for (auto* i : Connections) {
         if (i->Dum)
             continue;
-        for (auto j : Inputs_Node_Indices) {
-            int Self_Distance = abs(j - c->src);
-            int Connection_Distance = abs(j - i->src);
 
-            if (Connection_Distance < Self_Distance) {
-                for (auto k : Find_Path(i)) {
-                    Result.push_back(k);
-                }
+        int Self_Distance = abs(Input_Index - c->src);
+        int Connection_Distance = abs(Input_Index - i->src);
+
+        if (Connection_Distance < Self_Distance) {
+            for (auto k : Find_Path(i, Input_Index)) {
+                Result.push_back(k);
             }
-            else {
-                i->Dum = true;
-            }
+        }
+        else {
+            i->Dum = true;
         }
     }
     Trace.pop_back();
@@ -315,19 +352,63 @@ vector<Connection*> NN::Get_Previus_Connections(vector<Connection*> Input)
 vector<double> NN::Back_Propagation(vector<double> Expected_Outputs, vector<vector<Connection*>> Node_Path)
 {
     vector<double> Errors;
-    for (int i = 0; i < Node_Path.size(); i++) {
-        double Error = Expected_Outputs[i] - (Nodes[Node_Path[i][Node_Path[i].size() - 1]->dest]->Value * 10);
-        Errors.push_back(Error);
-        //find the most active connection of this path, and nuge it to the directions of the error vector.
-        Connection* Most_Active_Connection = Node_Path[i][Node_Path[i].size() - 1];
-        for (auto *j : Node_Path[i]) {
-            //calculate the distrance between the error and the current weight.
-            if (abs(j->weight - Error) > abs(Most_Active_Connection->weight - Error))
-                Most_Active_Connection = j;
+    //Calculate first the output node layer errors
+    for (auto output : Node_Path)
+        for (auto Current_Expected_Output : Expected_Outputs) {
+            output[output.size() - 1]->Error = Current_Expected_Output - (Nodes[output[output.size() - 1]->dest]->Value * 10);
+            Errors.push_back(output[output.size() - 1]->Error);
         }
-        //this most active connection's weight is nudged by the Learning rate.
-        Most_Active_Connection->weight = Sigmoid(Most_Active_Connection->weight + Error * Learning_Rate);
+
+    //we dont need to collect all of em.
+    //just add one at a time.
+    for (int Current_Path = 0; Current_Path < Node_Path.size(); Current_Path++) {
+        for (int i = Node_Path[Current_Path].size() - 2; i > 0; i--) {
+            Connection* Current = Node_Path[Current_Path][i];
+            Connection* Previus = Node_Path[Current_Path][i + 1];
+
+            Current->Error += Previus->weight * Previus->Error;
+
+            Current->Already_Summed.push_back(Previus);
+        }
     }
+    
+    //Run it back, this is to insure that all connections that are cross referenced in different paths are summed up.
+    for (int Current_Path = 0; Current_Path < Node_Path.size(); Current_Path++) {
+        for (int i = Node_Path[Current_Path].size() - 2; i > 0; i--) {
+            Connection* Current = Node_Path[Current_Path][i];
+            Connection* Previus = Node_Path[Current_Path][i + 1];
+
+            bool Already_Summed = false;
+            for (auto &j : Current->Already_Summed) {
+                if (j == Previus) {
+                    Already_Summed = true;
+                    break;
+                }
+            }
+            if (Already_Summed)
+                break;
+
+            Current->Error += Previus->weight * Previus->Error;
+        }
+    }
+
+    //find the biggest weight on each path :D
+    vector<Connection*> Largest_Weights;
+    for (auto &Path : Node_Path) {
+        Connection* Largest_Connection = Path[0];
+        for (auto *C : Path) {
+            if (abs(Largest_Connection->weight - Largest_Connection->Error) < abs(C->weight - C->Error)) {
+                Largest_Connection = C;
+            }
+        }
+        Largest_Weights.push_back(Largest_Connection);
+    }
+
+    //Now that we know the largest weights for every path, we can calculate the nuging.
+    for (auto *i : Largest_Weights) {
+        i->weight = i->weight + Sigmoid(i->Error) * Learning_Rate;
+    }
+
     return Errors;
 }
 
@@ -345,4 +426,5 @@ void NN::Clean_Dum_Connections()
             Connections.erase(Connections.begin() + i);
         }
     }
+    Update_Connections();
 }

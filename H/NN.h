@@ -13,7 +13,10 @@ class Connection{
         int src;
         int dest;
         double weight;
+        double Error;
         bool Dum = false;
+
+        vector<Connection*> Already_Summed;
 
         Connection(int src, int dest, double weight);
 
@@ -67,6 +70,7 @@ class NN{
         //The connection is added to the vector of connections.
         void Add_Connection_Random();
 
+        void Add_Connection_Random(int dest);
 
         //This function is the activation function.
         //We use the sigmoid function to activate the nodes.
@@ -106,7 +110,7 @@ class NN{
         void Train(vector<pair<vector<double>, vector<double>>> Data, int epochs);
 
         //This function tries to find the shortest path to the start
-        vector<Connection*> Find_Path(Connection* c);
+        vector<Connection*> Find_Path(Connection* c, int Input_Index);
 
         //This function does the backpropagation calculation.
         //The input is the output vector.
