@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include <thread>
 
 using namespace std;
 
@@ -42,12 +43,15 @@ class NN{
         vector<Node*> Nodes;
         //To prevent data copying use pointers.
         vector<Connection*> Connections;
+
+        vector<vector<Connection*>> Node_Path;
         //We want to make the output and the intput nodes to be runtime determine.
         //This way the neuralnetwork may be used for different problems.
         vector<int> Inputs_Node_Indices;
         vector<int> Outputs_Node_Indices;
         int Height;
         int Width;
+        double Lowest_Error = 100;
 
         NN(int Height, int Width);
 
@@ -99,7 +103,7 @@ class NN{
         //The output is gathered when a node is an output node. (this can be checked by the output node indices)
         //We also need to make sure that the Input vector given to this function is same size as the input nodes.
         //If not then use the resize function to resize the input vector.
-        vector<double> Feed_Forward(vector<double> Input);
+        vector<double> Feed_Forward(vector<double> Input, vector<vector<Connection*>> Node_Path);
 
         //This function can get a function pointter that is used to generate the training data set.
         //The function pointer gets a list of inputs and then return a list of outputs.
@@ -107,10 +111,10 @@ class NN{
 
         //This function will train the neural network besed on the training data set that we just generated.
         //The training data set is a list of inputs and outputs.
-        void Train(vector<pair<vector<double>, vector<double>>> Data, int epochs);
+        void Train(vector<pair<vector<double>, vector<double>>> Data, int Iteration);
 
         //This function tries to find the shortest path to the start
-        vector<Connection*> Find_Path(Connection* c, int Input_Index);
+        vector<Connection*> Find_Path(Connection* c, int Input_Index, vector<Connection*> Trace);
 
         //This function does the backpropagation calculation.
         //The input is the output vector.

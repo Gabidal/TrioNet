@@ -21,12 +21,18 @@
     <ClCompile Include="Cpp\NN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Cpp\Trainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="H\NN\NN.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="H\NN.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="H\Trainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -106,10 +106,10 @@ void NN::Add_Connection(int src, int dest, double weight)
 void NN::Add_Connection_Random(){
     int src, dest;
     double weight;
-    do{
+    //do{
         src = rand() % (Height * Width);
         dest = rand() % (Height * Width);
-    }while(src == dest);
+    //}while(src == dest);
     weight = ((double)rand() / (RAND_MAX)) * 2 - 1;
     Add_Connection(src, dest, weight);
 }
@@ -118,9 +118,9 @@ void NN::Add_Connection_Random(int dest)
 {
     int src;
     double weight;
-    do {
+    //do {
         src = rand() % (Height * Width);
-    } while (src == dest);
+    //} while (src == dest);
     weight = ((double)rand() / (RAND_MAX)) * 2 - 1;
     Add_Connection(src, dest, weight);
 }
@@ -203,7 +203,7 @@ void Node::Feed_Forward(NN* nn){
     Value = nn->Sigmoid(sum);
 }
 
-vector<double> NN::Feed_Forward(vector<double> Inputs)
+vector<double> NN::Feed_Forward(vector<double> Inputs, vector<vector<Connection*>> Node_Path)
 {
     //Set the input nodes to the input values
     for (int i = 0; i < Inputs.size(); i++)
@@ -211,9 +211,10 @@ vector<double> NN::Feed_Forward(vector<double> Inputs)
         Nodes[Inputs_Node_Indices[i]]->Value = Inputs[i];
     }
     //Feed forward the information from the connections a node has.
-    for (int i = 0; i < Height * Width; i++)
-    {
-        Nodes[i]->Feed_Forward(this);
+    for (auto &Path : Node_Path) {
+        for (auto& Con : Path) {
+            Nodes[Con->dest]->Feed_Forward(this);
+        }
     }
     //Return the output nodes
     vector<double> Outputs;
@@ -247,7 +248,6 @@ vector<pair<vector<double>, vector<double>>> NN::Get_Training_Data(vector<double
 
 void NN::Train(vector<pair<vector<double>, vector<double>>> Training_Data, int Iterations)
 {
-    vector<vector<Connection*>> Node_Path;
     //Try to path find through the connections, a conneciton that starts from a certain input node, and end in a certain output node.
     //Gather these connections into a list, this list will be back propagated.
     for (auto Input : Inputs_Node_Indices) {
@@ -256,45 +256,49 @@ void NN::Train(vector<pair<vector<double>, vector<double>>> Training_Data, int I
             bool No_Connection = true;
             while (No_Connection) {
                 for (auto Con : Nodes[Output]->Connections) {
-                    for (auto Path : Find_Path(Con, Input)) {
+                    for (auto Path : Find_Path(Con, Input, vector<Connection*>())) {
                         Single_Path.push_back(Path);
                     }
                     if (Single_Path.size() == 0) {
-                        Add_Connection_Random();
+                        Add_Connection_Random(Con->src);
+                        for (auto Path : Find_Path(Con, Input, vector<Connection*>())) {
+                            Single_Path.push_back(Path);
+                        }
                     }
+                    if (Single_Path.size() != 0)
+                        break;
                 }
-                if (Single_Path.size() == 0) {
-                    Add_Connection_Random();
+                if (Single_Path.size() > 0) {
+                    No_Connection = false;
                 }
                 else {
-                    No_Connection = false;
+                    Add_Connection_Random(Output);
                 }
             }
             Node_Path.push_back(Single_Path);
         }
     }
+
     for (int i = 0; i < Iterations; i++)
     {
         double All_Avg = 0;
         for (int j = 0; j < Training_Data.size(); j++)
         {
             double Avg = 0;
-            Feed_Forward(Training_Data[j].first);
+            Feed_Forward(Training_Data[j].first, Node_Path);
             vector<double> Errors = Back_Propagation(Training_Data[j].second, Node_Path);
             for (auto i : Errors)
                 Avg += i;
             Avg /= Errors.size();
             All_Avg += Avg;
         }
-        cout << "Error: " + to_string(All_Avg / Training_Data.size()) << endl;
+        //cout << "Error: " + to_string(All_Avg / Training_Data.size()) << endl;
+        Lowest_Error = All_Avg / Training_Data.size();
     }
-    cout << "All connections count: " << Connections.size() << endl;
     Clean_Dum_Connections();
-    cout << "True connections count: " << Connections.size() << endl;
 }
 
-vector<Connection*> Trace;
-vector<Connection*> NN::Find_Path(Connection* c, int Input_Index)
+vector<Connection*> NN::Find_Path(Connection* c, int Input_Index, vector<Connection*> Trace)
 {
     vector<Connection*> Result;
 
@@ -321,7 +325,7 @@ vector<Connection*> NN::Find_Path(Connection* c, int Input_Index)
         int Connection_Distance = abs(Input_Index - i->src);
 
         if (Connection_Distance < Self_Distance) {
-            for (auto k : Find_Path(i, Input_Index)) {
+            for (auto k : Find_Path(i, Input_Index, Trace)) {
                 Result.push_back(k);
             }
         }

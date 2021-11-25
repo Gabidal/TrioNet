@@ -133,10 +133,12 @@
   <ItemGroup>
     <ClCompile Include="cpp\main.cpp" />
     <ClCompile Include="Cpp\NN.cpp" />
+    <ClCompile Include="Cpp\Trainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="H\NN.h" />
     <ClInclude Include="H\NN\NN.h" />
+    <ClInclude Include="H\Trainer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
