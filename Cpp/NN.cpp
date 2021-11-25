@@ -1,6 +1,6 @@
 #include "../H/NN.h"
 
-constexpr double Learning_Rate = 0.0001;
+constexpr double Learning_Rate = 0.01;
 
 NN::NN(int Height, int Width){
     srand(time(NULL));
@@ -139,7 +139,7 @@ void NN::Resize_Input_Vector(int Input){
         //Add new inputs to the input node indices vector until it is the same size as the input vector.
         for (int i = Inputs_Node_Indices.size(); i < Input; i++)
         {
-            int index = rand() % Height * Width;
+            int index = rand() % (Height * Width);
 
             //make sure the input node is not already in the vector.
             bool found = false;
@@ -165,7 +165,7 @@ void NN::Resize_Output_Vector(int Output){
         //Add new outputs to the output node indices vector until it is the same size as the output vector.
         for (int i = Outputs_Node_Indices.size(); i < Output; i++)
         {
-            int index = rand() % Height * Width;
+            int index = rand() % (Height * Width);
 
             //make sure the output node is not already in the vector.
             bool found = false;
@@ -196,9 +196,9 @@ void NN::Update_Connections(){
 }
 
 void Node::Feed_Forward(NN* nn){
-    double sum = 1;
+    double sum = 0;
     for (auto *i : Connections){
-        sum += i->weight * nn->Nodes[i->src]->Value - 1;
+        sum += i->weight * nn->Nodes[i->src]->Value;
     }
     Value = nn->Sigmoid(sum);
 }
@@ -260,11 +260,11 @@ void NN::Train(vector<pair<vector<double>, vector<double>>> Training_Data, int I
                         Single_Path.push_back(Path);
                     }
                     if (Single_Path.size() == 0) {
-                        Add_Connection_Random(Con->src);
+                        Add_Connection_Random();
                     }
                 }
                 if (Single_Path.size() == 0) {
-                    Add_Connection_Random(Output);
+                    Add_Connection_Random();
                 }
                 else {
                     No_Connection = false;
@@ -275,16 +275,18 @@ void NN::Train(vector<pair<vector<double>, vector<double>>> Training_Data, int I
     }
     for (int i = 0; i < Iterations; i++)
     {
-        double Avg = 0;
+        double All_Avg = 0;
         for (int j = 0; j < Training_Data.size(); j++)
         {
+            double Avg = 0;
             Feed_Forward(Training_Data[j].first);
             vector<double> Errors = Back_Propagation(Training_Data[j].second, Node_Path);
             for (auto i : Errors)
                 Avg += i;
             Avg /= Errors.size();
+            All_Avg += Avg;
         }
-        cout << "Error: " + to_string(Avg) + "%" << endl;
+        cout << "Error: " + to_string(All_Avg / Training_Data.size()) << endl;
     }
     cout << "All connections count: " << Connections.size() << endl;
     Clean_Dum_Connections();
@@ -355,8 +357,8 @@ vector<double> NN::Back_Propagation(vector<double> Expected_Outputs, vector<vect
     //Calculate first the output node layer errors
     for (auto output : Node_Path)
         for (auto Current_Expected_Output : Expected_Outputs) {
-            output[output.size() - 1]->Error = Current_Expected_Output - (Nodes[output[output.size() - 1]->dest]->Value * 10);
-            Errors.push_back(output[output.size() - 1]->Error);
+            output[output.size() - 1]->Error = -(Current_Expected_Output - (Nodes[output[output.size() - 1]->dest]->Value * 100)) * Sigmoid_Derivative(Nodes[output[output.size() - 1]->dest]->Value);
+            Errors.push_back(abs(Current_Expected_Output - (Nodes[output[output.size() - 1]->dest]->Value * 100)));
         }
 
     //we dont need to collect all of em.
@@ -397,6 +399,8 @@ vector<double> NN::Back_Propagation(vector<double> Expected_Outputs, vector<vect
     for (auto &Path : Node_Path) {
         Connection* Largest_Connection = Path[0];
         for (auto *C : Path) {
+            C->Error = C->Error * Sigmoid_Derivative(Nodes[C->dest]->Value);
+
             if (abs(Largest_Connection->weight - Largest_Connection->Error) < abs(C->weight - C->Error)) {
                 Largest_Connection = C;
             }
@@ -406,7 +410,7 @@ vector<double> NN::Back_Propagation(vector<double> Expected_Outputs, vector<vect
 
     //Now that we know the largest weights for every path, we can calculate the nuging.
     for (auto *i : Largest_Weights) {
-        i->weight = i->weight + Sigmoid(i->Error) * Learning_Rate;
+        i->weight -= i->Error * Learning_Rate * Nodes[i->src]->Value;
     }
 
     return Errors;

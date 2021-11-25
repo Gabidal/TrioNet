@@ -2,7 +2,7 @@
 
 //how many times the data set is looped through
 constexpr int ACCURACY = 100;
-constexpr int BATCH_SIZE = 10000;
+constexpr int BATCH_SIZE = 100000;
 
 vector<double> Sum(vector<double> in)
 {
@@ -10,7 +10,7 @@ vector<double> Sum(vector<double> in)
 }
 
 int main(int argc, const char** argv){
-    NN nn(3, 3);
+    NN nn(10, 10);
     cout << "Loading Weights" << endl;
     nn.Load_Weights("Saved_Weights.txt");
     cout << "Training AI..." << endl;
@@ -25,6 +25,9 @@ int main(int argc, const char** argv){
     nn.Feed_Forward({ a, b });
 
     cout << nn.Nodes[nn.Outputs_Node_Indices[0]]->Value << endl;
+
+    int wait;
+    cin >> wait;
 
     return 0;
 }
