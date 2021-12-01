@@ -4,6 +4,8 @@
 #include <iostream>
 #include <math.h>
 #include <thread>
+#include <algorithm>
+
 
 using namespace std;
 
@@ -11,10 +13,10 @@ using namespace std;
 //The connection specifies the src and dest nodes by indicees.
 class Connection{
     public:
-        int src;
-        int dest;
-        double weight;
-        double Error;
+        int src = 0;
+        int dest = 0;
+        double weight = 0;
+        double Error = 0;
         bool Dum = false;
 
         vector<Connection*> Already_Summed;
@@ -111,7 +113,9 @@ class NN{
 
         //This function will train the neural network besed on the training data set that we just generated.
         //The training data set is a list of inputs and outputs.
-        void Train(vector<pair<vector<double>, vector<double>>> Data, int Iteration);
+        void Start_Train(vector<pair<vector<double>, vector<double>>> Data, int Iteration);
+
+        void Train(int Training_Data_Start_Index, int Training_Data_End_Index, vector<pair<vector<double>, vector<double>>>* Training_Data, double& Error, int Iterations);
 
         //This function tries to find the shortest path to the start
         vector<Connection*> Find_Path(Connection* c, int Input_Index, vector<Connection*> Trace);
@@ -130,4 +134,12 @@ class NN{
 
         void Clean_Dum_Connections();
 
+
+        NN(const NN& Og);
+
+        void Update_Path();
+
+        //This function reorders the connections so that the connections are in the order of what connection is closest to the output node.
+        //The output is the list of connections.
+        vector<vector<Connection*>> Reorder_Connections(vector<vector<Connection*>> Node_Path);
 };

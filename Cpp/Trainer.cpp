@@ -22,7 +22,7 @@ void Trainer::Run_NN(NN* Previus_Best, NN* Current)
 
     }
 
-    Current->Train(Generated_Trainin_Data, Iteration);
+    Current->Start_Train(Generated_Trainin_Data, Iteration);
 }
 
 void Trainer::Train()
@@ -54,11 +54,17 @@ void Trainer::Train()
             Candidates.push_back(Candidate);
 
             T = thread(&Trainer::Run_NN, this, Best, Candidate);
-            T.detach();
             //thread([this, Best, Candidate] { Run_NN(Best, Candidate); });
         }
 
         cout << "Error: " << Best->Lowest_Error << endl;
+    }
+
+    for (auto& T : Threads) {
+        while (T.joinable() == false) {
+            _sleep(500);
+        }
+        T.join();
     }
 
     Best->Save_Weights("Saved_Weights.txt");
