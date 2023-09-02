@@ -57,6 +57,8 @@ class NN{
 
         NN(int Height, int Width);
 
+        void Set(NN& other);
+
         //Make a function that can load the weights from a file.
         //The first section tells the src node index, the second section tells the dest node index, and the third section tells the weight.
         //These sections are seperated by commad

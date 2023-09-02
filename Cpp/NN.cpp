@@ -11,6 +11,16 @@ NN::NN(int Height, int Width){
     }
 }
 
+void NN::Set(NN& Og)
+{
+    Lowest_Error = Og.Lowest_Error;
+
+    for (int i = 0; i < Og.Connections.size(); i++) {
+        Connections[i]->Already_Summed.clear();
+        Connections[i]->weight = Og.Connections[i]->weight;
+    }
+}
+
 void NN::Save_Weights(string fileName)
 {
     std::ofstream file(fileName, std::ios::binary);
@@ -277,9 +287,10 @@ void NN::Start_Train(vector<pair<vector<double>, vector<double>>> Training_Data,
     }
     
     vector<pair<vector<double>, vector<double>>>* Data = &Training_Data;
+    pair<time_t, double> Iteration_Info = {time(NULL), 100};
 
-
-    while (Lowest_Error > 0.1)
+    bool Stop = false;
+    while (Lowest_Error > 0.01 && Stop == false)
     {
         double All_Avg = 0;
 
@@ -287,7 +298,7 @@ void NN::Start_Train(vector<pair<vector<double>, vector<double>>> Training_Data,
 
         //update all the students.
             for (auto& S : Students) {
-                *S = NN(*this);
+                S->Set(*this);
             }
 
         for (int T = 0; T < Core_Count; T++) {
@@ -324,6 +335,14 @@ void NN::Start_Train(vector<pair<vector<double>, vector<double>>> Training_Data,
 
         Lowest_Error = All_Avg / Training_Data.size();
         cout << "Error: " + to_string(All_Avg / Training_Data.size()) << endl;
+
+        if (Iteration_Info.second > Lowest_Error) {
+            Iteration_Info.first = time(NULL);
+            Iteration_Info.second = Lowest_Error;
+        }
+        else if (abs(Iteration_Info.first - time(NULL)) >= 1000 * 60 * 5) {
+            Stop = true;
+        }
     }
     Clean_Dum_Connections();
 }
